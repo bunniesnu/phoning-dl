@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
+	"sort"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -100,7 +102,7 @@ func (m *App) LoadingConfigScreen(done chan struct{}) *fyne.Container {
 }
 
 func (m *App) MainScreen() *fyne.Container {
-	liveSelection := make([]Live, 0)
+	liveSelection := new([]Live)
 	slog.Info("Loading main screen")
 	fetchingLiveLabel := widget.NewLabel("Fetching lives...")
 	vbox := container.NewVBox(
@@ -121,20 +123,19 @@ func (m *App) MainScreen() *fyne.Container {
 		}
 		slog.Info("Lives fetched successfully", "count", len(*lives))
 		decodeFailed := false
-		for _, live := range *lives {
+		parseFunc := func(live LiveJSON, ctx context.Context) (*Live, error) {
 			startAtParse, err := time.Parse(time.RFC3339Nano, live.StartAt)
 			if err != nil {
 				slog.Error("Failed to parse startAt", "error", err, "startAt", live.StartAt)
-				decodeFailed = true
-				break
+				return nil, err
 			}
 			endAtParse, err := time.Parse(time.RFC3339Nano, live.EndAt)
 			if err != nil {
 				slog.Error("Failed to parse endAt", "error", err, "endAt", live.EndAt)
-				decodeFailed = true
-				break
+				return nil, err
 			}
-			liveSelection = append(liveSelection, Live{
+			liveReturn := new(Live)
+			*liveReturn = Live{
 				Id:       live.Id,
 				Title:    live.Title,
 				Selected: true,
@@ -143,8 +144,25 @@ func (m *App) MainScreen() *fyne.Container {
 				EndAt:   endAtParse,
 				Duration: time.Duration(live.Duration) * time.Millisecond,
 				IsLandscape: live.ScreenOrientation == "LANDSCAPE",
-			})
+			}
+			return liveReturn, nil
 		}
+		liveSelectionTmp, err := concurrentExecute(parseFunc, *lives, DefaultConcurrency)
+		if err != nil {
+			slog.Error("Failed to decode lives", "error", err)
+			decodeFailed = true
+		}
+		*liveSelection = make([]Live, len(liveSelectionTmp))
+		for _, live := range liveSelectionTmp {
+			if live != nil {
+				*liveSelection = append(*liveSelection, *live)
+			} else {
+				slog.Warn("Received nil live from concurrent execution")
+			}
+		}
+		sort.Slice(*liveSelection, func(i, j int) bool {
+			return (*liveSelection)[i].StartAt.After((*liveSelection)[j].StartAt)
+		})
 		fyne.Do(func() {
 			vbox.RemoveAll()
 			if decodeFailed {

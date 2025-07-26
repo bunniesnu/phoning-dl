@@ -4,6 +4,7 @@ const (
 	DefaultWindowTitle  = "PhoningDL"
 	DefaultWindowWidth  = 800
 	DefaultWindowHeight = 600
+	DefaultConcurrency  = 10
 )
 
 var DefaultWevSDKHeaders = map[string]string{
