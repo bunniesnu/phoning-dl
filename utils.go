@@ -152,7 +152,7 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	if !(val.EmailVerified) {
 		return "", fmt.Errorf("email verification failed")
 	}
-	updateProgress("Email verified successfully", 0.8)
+	updateProgress("Email verified successfully", 0.7)
 
 	// Register the account to get the access token
 	if email == "" || password == "" {
@@ -203,6 +203,6 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	if !ok {
 		log.Fatal("Access token not found in response")
 	}
-	updateProgress("Access token generated successfully", 1.0)
+	updateProgress("Access token generated successfully", 0.8)
 	return accessToken, nil
 }

@@ -56,6 +56,7 @@ func (m *App) LoadingConfigScreen(done chan struct{}) *fyne.Container {
 				return
 			}
 		}
+		updateProgress("Validating configuration", 0.9)
 		_, err = Phoning("GET", m.config.ApiKey, m.config.AccessToken, "/fan/v1.0/users/me")
 		if err != nil {
 			slog.Info("Trying to login")
@@ -79,7 +80,7 @@ func (m *App) LoadingConfigScreen(done chan struct{}) *fyne.Container {
 				return
 			}
 		}
-		slog.Info("Configuration loaded successfully")
+		updateProgress("Configuration validated successfully", 1.0)
 		fyne.Do(func() {
 			progress.Hide()
 		})
