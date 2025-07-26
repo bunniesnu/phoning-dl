@@ -6,8 +6,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func LoadingConfigScreen() *fyne.Container {
-	title := widget.NewLabel("Loading configuration...")
+func (m *App) LoadingConfigScreen() *fyne.Container {
+	title := widget.NewLabel("Loading configuration. Please wait...")
+	defer func() {
+		_ = m.LoadConfig()
+	}()
 	return container.NewVBox(
 		title,
 	)

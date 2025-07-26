@@ -3,6 +3,8 @@ package main
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 )
 
 func main() {
@@ -11,9 +13,16 @@ func main() {
 	w := a.NewWindow(DefaultWindowTitle)
 	size := fyne.NewSize(DefaultWindowWidth, DefaultWindowHeight)
 	w.Resize(size)
+	m := &App{
+		w:      &w,
+		config: &Config{},
+	}
 
 	// Contents
-	w.SetContent(LoadingConfigScreen())
+	err := m.UpdateState(0)
+	if err != nil {
+		w.SetContent(container.NewVBox(widget.NewLabel("Oops, something went wrong!")))
+	}
 
 	// Run
 	w.ShowAndRun()
