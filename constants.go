@@ -4,6 +4,4 @@ const (
 	DefaultWindowTitle  = "PhoningDL"
 	DefaultWindowWidth  = 800
 	DefaultWindowHeight = 600
-	LoadingWindowWidth  = 400
-	LoadingWindowHeight = 200
 )

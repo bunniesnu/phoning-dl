@@ -11,9 +11,9 @@ func main() {
 	// Initialize
 	a := app.New()
 	w := a.NewWindow(DefaultWindowTitle)
-	loadingSize := fyne.NewSize(LoadingWindowWidth, LoadingWindowHeight)
-	mainSize := fyne.NewSize(DefaultWindowWidth, DefaultWindowHeight)
-	w.Resize(loadingSize)
+	size := fyne.NewSize(DefaultWindowWidth, DefaultWindowHeight)
+	w.Resize(size)
+	w.CenterOnScreen()
 	m := &App{
 		w:      &w,
 		config: &Config{},
@@ -30,7 +30,7 @@ func main() {
 		time.Sleep(100 * time.Millisecond)
 		fyne.Do(func() {
 			w.SetContent(m.MainScreen())
-			w.Resize(mainSize)
+			w.Resize(size)
 			screen = m.MainScreen()
 			w.SetContent(screen)
 		})
