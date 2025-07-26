@@ -6,12 +6,14 @@ import (
 	"path"
 )
 
+const ConfigFileName = "config.json"
+
 func (m *App) LoadConfig() error {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return err
 	}
-	configPath := path.Join(configDir, "phoningdl", "config.json")
+	configPath := path.Join(configDir, AppName, ConfigFileName)
 	file, err := os.Open(configPath)
 	if err != nil {
 		return err
@@ -32,8 +34,8 @@ func (m *App) SaveConfig() error {
 	if err != nil {
 		return err
 	}
-	configPath := path.Join(configDir, "phoningdl", "config.json")
-	os.MkdirAll(path.Join(configDir, "phoningdl"), os.ModePerm)
+	configPath := path.Join(configDir, AppName, ConfigFileName)
+	os.MkdirAll(path.Join(configDir, AppName), os.ModePerm)
 	file, err := os.Create(configPath)
 	if err != nil {
 		return err

@@ -1,6 +1,7 @@
 package main
 
 const (
+	AppName		    	= "phoningdl"
 	DefaultWindowTitle  = "PhoningDL"
 	DefaultWindowWidth  = 800
 	DefaultWindowHeight = 600
