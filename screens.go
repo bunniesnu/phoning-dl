@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"os"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -29,8 +30,8 @@ func (m *App) LoadingConfigScreen(done chan struct{}) *fyne.Container {
 			progress.SetValue(0.0)
 		})
 		err := m.LoadConfig()
-		if err != nil || m.config.AccessToken == "" {
-			accessToken, err := GenerateAccessToken(updateProgress)
+		if err != nil || m.config.AccessToken == "" || m.config.TokenTimeout < time.Now().Unix() {
+			accessToken, expiresIn, err := GenerateAccessToken(updateProgress)
 			if err != nil {
 				slog.Error("Failed to generate access token", "error", err)
 				vbox.Add(widget.NewLabel("Failed to generate access token."))
@@ -38,6 +39,7 @@ func (m *App) LoadingConfigScreen(done chan struct{}) *fyne.Container {
 				return
 			}
 			m.config.AccessToken = accessToken
+			m.config.TokenTimeout = time.Now().Unix() + expiresIn
 			err = m.SaveConfig()
 			if err != nil {
 				slog.Error("Failed to save access token", "error", err)

@@ -32,15 +32,15 @@ func getRandomChar(charset string) byte {
 	return charset[n.Int64()]
 }
 
-func GenerateAccessToken(updateProgress func(msg string, value float64)) (string, error) {
+func GenerateAccessToken(updateProgress func(msg string, value float64)) (string, int64, error) {
 	// Generate a random email
 	gmail, err := gmailnator.NewGmailnator()
 	if err != nil {
-		return "", fmt.Errorf("error creating Gmailnator client: %v", err)
+		return "", 0, fmt.Errorf("error creating Gmailnator client: %v", err)
 	}
 	err = gmail.GenerateEmail()
 	if err != nil {
-		return "", fmt.Errorf("error generating email: %v", err)
+		return "", 0, fmt.Errorf("error generating email: %v", err)
 	}
 	email := gmail.Email.Email
 	updateProgress("Generated random email", 0.1)
@@ -65,40 +65,40 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	// Create a Weverse client and sign up
 	w, err := weverse.New(email, password, "", 0)
 	if err != nil {
-		return "", fmt.Errorf("error creating Weverse client: %v", err)
+		return "", 0, fmt.Errorf("error creating Weverse client: %v", err)
 	}
 	nickname, err := w.GetAccountNicknameSuggestion()
 	if err != nil {
-		return "", fmt.Errorf("error getting nickname suggestion")
+		return "", 0, fmt.Errorf("error getting nickname suggestion")
 	}
 	w.Nickname = nickname
 	err = w.CreateAccount()
 	updateProgress("Signed up with Weverse", 0.3)
 	if err != nil {
-		return "", fmt.Errorf("error signing up: %v", err)
+		return "", 0, fmt.Errorf("error signing up: %v", err)
 	}
 	res := ""
 	for i := range 5 {
 		email, err := gmail.GetMails()
 		if err != nil {
-			return "", fmt.Errorf("error getting emails: %v", err)
+			return "", 0, fmt.Errorf("error getting emails: %v", err)
 		}
 		if email == nil {
-			return "", fmt.Errorf("no emails found")
+			return "", 0, fmt.Errorf("no emails found")
 		}
 		for _, mail := range email {
 			messageId := mail.Mid
 			mailDetails, err := gmail.GetMailBody(messageId)
 			if err != nil {
-				return "", fmt.Errorf("error getting mail body for message ID %s: %v", messageId, err)
+				return "", 0, fmt.Errorf("error getting mail body for message ID %s: %v", messageId, err)
 			}
 			if mailDetails == "" {
-				return "", fmt.Errorf("mail body is empty for message ID %s", messageId)
+				return "", 0, fmt.Errorf("mail body is empty for message ID %s", messageId)
 			}
 			if strings.Contains(mailDetails, "account.weverse.io/signup") {
 				start := strings.Index(mailDetails, "https://account.weverse.io/signup")
 				if start == -1 {
-					return "", fmt.Errorf("verification link not found in mail body")
+					return "", 0, fmt.Errorf("verification link not found in mail body")
 				}
 				end := strings.IndexAny(mailDetails[start:], " \"'<")
 				if end == -1 {
@@ -116,7 +116,7 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 		time.Sleep(5 * time.Second)
 	}
 	if res == "" {
-		return "", fmt.Errorf("verification link not found in any emails")
+		return "", 0, fmt.Errorf("verification link not found in any emails")
 	}
 	updateProgress("Found verification link", 0.5)
 	res = strings.ReplaceAll(res, "&amp;", "&")
@@ -140,23 +140,23 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 		chromedp.OuterHTML("html", &html),
 	)
 	if err != nil {
-		return "", fmt.Errorf("error clicking link: %v", err)
+		return "", 0, fmt.Errorf("error clicking link: %v", err)
 	}
 	updateProgress("Clicked verification link", 0.6)
 
 	// Check if the email is verified
 	val, err := w.GetAccountStatus()
 	if err != nil {
-		return "", fmt.Errorf("error checking verification: %v", err)
+		return "", 0, fmt.Errorf("error checking verification: %v", err)
 	}
 	if !(val.EmailVerified) {
-		return "", fmt.Errorf("email verification failed")
+		return "", 0, fmt.Errorf("email verification failed")
 	}
 	updateProgress("Email verified successfully", 0.7)
 
 	// Register the account to get the access token
 	if email == "" || password == "" {
-		return "", fmt.Errorf("Email or password not found in registration response")
+		return "", 0, fmt.Errorf("Email or password not found in registration response")
 	}
 	body := map[string]any{
 		"email":    email,
@@ -164,7 +164,7 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	}
 	encodedBody, err := json.Marshal(body)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 	req, err := http.NewRequest("POST", "https://sdk.weverse.io/api/v2/auth/token/by-credentials", strings.NewReader(string(encodedBody)))
 	for key, value := range DefaultWevSDKHeaders {
@@ -185,6 +185,10 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	if !ok {
 		log.Fatal("Access token not found in response")
 	}
+	expiresIn, ok := decodedResponse["expiresIn"].(float64)
+	if !ok {
+		log.Fatal("Expires in not found in response")
+	}
 	updateProgress("Access token generated successfully", 0.8)
-	return accessToken, nil
+	return accessToken, int64(expiresIn), nil
 }
