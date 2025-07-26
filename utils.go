@@ -106,6 +106,9 @@ func GenerateAccessToken() (string, error) {
 				break
 			}
 		}
+		if res != "" {
+			break
+		}
 		time.Sleep(5 * time.Second)
 	}
 	if res == "" {
