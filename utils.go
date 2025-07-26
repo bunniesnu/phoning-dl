@@ -237,3 +237,13 @@ func (m *App) FetchLives() (*[]LiveJSON, error) {
 	}
 	return callsData, nil
 }
+
+func getSelectedNum(liveSelection *[]Live) int {
+	selectedCount := 0
+	for _, live := range *liveSelection {
+		if live.Selected {
+			selectedCount++
+		}
+	}
+	return selectedCount
+}

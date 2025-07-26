@@ -5,6 +5,7 @@ const (
 	DefaultWindowTitle  = "PhoningDL"
 	DefaultWindowWidth  = 800
 	DefaultWindowHeight = 600
+	InnerHeight			= 300
 	DefaultConcurrency  = 10
 )
 

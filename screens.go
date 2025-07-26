@@ -166,7 +166,7 @@ func (m *App) MainScreen() *fyne.Container {
 			decodeFailed = true
 		}
 		slog.Info("Lives decoded successfully", "count", len(liveSelectionTmp))
-		*liveSelection = make([]Live, len(liveSelectionTmp))
+		*liveSelection = make([]Live, 0)
 		for _, live := range liveSelectionTmp {
 			if live != nil {
 				*liveSelection = append(*liveSelection, *live)
@@ -183,7 +183,8 @@ func (m *App) MainScreen() *fyne.Container {
 				vbox.Add(widget.NewLabel("Failed to decode lives."))
 				vbox.Add(retryBtn)
 			} else {
-				vbox.Add(widget.NewLabel("Lives fetched successfully!"))
+				downloadScreen := m.DownloadScreen(liveSelection, lives)
+				vbox.Add(downloadScreen)
 			}
 			vbox.Refresh()
 		})
