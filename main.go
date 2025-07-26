@@ -8,20 +8,31 @@ import (
 func main() {
 	// Initialize
 	a := app.New()
-
-	// Load configuration
-	loadingWindow := a.NewWindow(DefaultWindowTitle)
-	size := fyne.NewSize(LoadingWindowWidth, LoadingWindowHeight)
-	loadingWindow.Resize(size)
+	w := a.NewWindow(DefaultWindowTitle)
+	loadingSize := fyne.NewSize(LoadingWindowWidth, LoadingWindowHeight)
+	mainSize := fyne.NewSize(DefaultWindowWidth, DefaultWindowHeight)
+	w.Resize(loadingSize)
 	m := &App{
-		w:      &loadingWindow,
+		w:      &w,
 		config: &Config{},
 	}
 
-	// Contents
-	screen := m.LoadingConfigScreen()
-	loadingWindow.SetContent(screen)
+	// Loading screen
+	done := make(chan struct{})
+	screen := m.LoadingConfigScreen(done)
+	w.SetContent(screen)
+
+	// Main screen
+	go func() {
+		<-done
+		fyne.Do(func() {
+			w.SetContent(m.MainScreen())
+			w.Resize(mainSize)
+			screen = m.MainScreen()
+			w.SetContent(screen)
+		})
+	}()
 
 	// Run
-	loadingWindow.ShowAndRun()
+	w.ShowAndRun()
 }

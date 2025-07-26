@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func (m *App) LoadingConfigScreen() *fyne.Container {
+func (m *App) LoadingConfigScreen(done chan struct{}) *fyne.Container {
 	title := widget.NewLabel("Loading configuration. Please wait...")
 	progress := widget.NewProgressBar()
 	updateProgress := func(msg string, value float64) {
@@ -84,7 +84,7 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 			progress.Hide()
 		})
 		vbox.Add(widget.NewLabel("Configuration loaded successfully!"))
-		fyne.Do((*m.w).Close)
+		done <- struct{}{}
 	}
 	retryBtn = widget.NewButton("Retry", func() {
 		vbox.RemoveAll()
@@ -93,5 +93,13 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 		go validateConfig()
 	})
 	go validateConfig()
+	return vbox
+}
+
+func (m *App) MainScreen() *fyne.Container {
+	title := widget.NewLabel("PhoningDL")
+	vbox := container.NewVBox(
+		title,
+	)
 	return vbox
 }
