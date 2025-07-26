@@ -22,7 +22,11 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 		title,
 		progress,
 	)
-	go func() {
+	validateConfig := func() {
+		fyne.Do(func() {
+			progress.Show()
+			progress.SetValue(0.0)
+		})
 		err := m.LoadConfig()
 		if err != nil || m.config.AccessToken == "" {
 			accessToken, err := GenerateAccessToken(updateProgress)
@@ -70,8 +74,11 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 			}
 		}
 		slog.Info("Configuration loaded successfully")
-		progress.Hide()
+		fyne.Do(func() {
+			progress.Hide()
+		})
 		vbox.Add(widget.NewLabel("Configuration loaded successfully!"))
-	}()
+	}
+	go validateConfig()
 	return vbox
 }
