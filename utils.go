@@ -32,7 +32,7 @@ func getRandomChar(charset string) byte {
 	return charset[n.Int64()]
 }
 
-func GenerateAccessToken() (string, error) {
+func GenerateAccessToken(updateProgress func(msg string, value float64)) (string, error) {
 	// Generate a random email
 	gmail, err := gmailnator.NewGmailnator()
 	if err != nil {
@@ -43,6 +43,7 @@ func GenerateAccessToken() (string, error) {
 		return "", fmt.Errorf("error generating email: %v", err)
 	}
 	email := gmail.Email.Email
+	updateProgress("Generated random email", 0.1)
 	
 	// Generate a random password
 	passwordSet := []byte{
@@ -59,6 +60,7 @@ func GenerateAccessToken() (string, error) {
 		passwordSet[i], passwordSet[j.Int64()] = passwordSet[j.Int64()], passwordSet[i]
 	}
 	password := string(passwordSet)
+	updateProgress("Generated random password", 0.2)
 
 	// Create a Weverse client and sign up
 	w, err := weverse.New(email, password, "", 0)
@@ -71,11 +73,12 @@ func GenerateAccessToken() (string, error) {
 	}
 	w.Nickname = nickname
 	err = w.CreateAccount()
+	updateProgress("Signed up with Weverse", 0.3)
 	if err != nil {
 		return "", fmt.Errorf("error signing up: %v", err)
 	}
 	res := ""
-	for range 5 {
+	for i := range 5 {
 		email, err := gmail.GetMails()
 		if err != nil {
 			return "", fmt.Errorf("error getting emails: %v", err)
@@ -109,11 +112,13 @@ func GenerateAccessToken() (string, error) {
 		if res != "" {
 			break
 		}
+		updateProgress(fmt.Sprintf("Checking for verification email (%d/5)", i+1), 0.3+float64(i+1)*0.02)
 		time.Sleep(5 * time.Second)
 	}
 	if res == "" {
 		return "", fmt.Errorf("verification link not found in any emails")
 	}
+	updateProgress("Found verification link", 0.5)
 	res = strings.ReplaceAll(res, "&amp;", "&")
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag("headless", true),
@@ -137,6 +142,7 @@ func GenerateAccessToken() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error clicking link: %v", err)
 	}
+	updateProgress("Clicked verification link", 0.6)
 
 	// Check if the email is verified
 	val, err := w.GetAccountStatus()
@@ -146,6 +152,7 @@ func GenerateAccessToken() (string, error) {
 	if !(val.EmailVerified) {
 		return "", fmt.Errorf("email verification failed")
 	}
+	updateProgress("Email verified successfully", 0.8)
 
 	// Register the account to get the access token
 	if email == "" || password == "" {
@@ -196,5 +203,6 @@ func GenerateAccessToken() (string, error) {
 	if !ok {
 		log.Fatal("Access token not found in response")
 	}
+	updateProgress("Access token generated successfully", 1.0)
 	return accessToken, nil
 }
