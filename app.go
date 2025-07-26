@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 
 	"fyne.io/fyne/v2"
 )
@@ -13,7 +14,7 @@ func (m *App) LoadConfig() error {
 	if err != nil {
 		return err
 	}
-	configPath := configDir + "/phoningdl/config.json"
+	configPath := path.Join(configDir, "phoningdl", "config.json")
 	file, err := os.Open(configPath)
 	if err != nil {
 		return err
@@ -34,8 +35,8 @@ func (m *App) SaveConfig() error {
 	if err != nil {
 		return err
 	}
-	configPath := configDir + "/phoningdl/config.json"
-	os.MkdirAll(configDir+"/phoningdl", os.ModePerm)
+	configPath := path.Join(configDir, "phoningdl", "config.json")
+	os.MkdirAll(path.Join(configDir, "phoningdl"), os.ModePerm)
 	file, err := os.Create(configPath)
 	if err != nil {
 		return err
