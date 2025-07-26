@@ -22,6 +22,7 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 		title,
 		progress,
 	)
+	var retryBtn *widget.Button
 	validateConfig := func() {
 		fyne.Do(func() {
 			progress.Show()
@@ -32,14 +33,16 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 			accessToken, err := GenerateAccessToken(updateProgress)
 			if err != nil {
 				slog.Error("Failed to generate access token", "error", err)
-				vbox.Add(widget.NewLabel("Failed to generate access token. Please try again later."))
+				vbox.Add(widget.NewLabel("Failed to generate access token."))
+				vbox.Add(retryBtn)
 				return
 			}
 			m.config.AccessToken = accessToken
 			err = m.SaveConfig()
 			if err != nil {
 				slog.Error("Failed to save access token", "error", err)
-				vbox.Add(widget.NewLabel("Failed to save configuration. Please try again later."))
+				vbox.Add(widget.NewLabel("Failed to save configuration."))
+				vbox.Add(retryBtn)
 				return
 			}
 		}
@@ -48,7 +51,8 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 			err := m.SaveConfig()
 			if err != nil {
 				slog.Error("Failed to save API key", "error", err)
-				vbox.Add(widget.NewLabel("Failed to save configuration. Please try again later."))
+				vbox.Add(widget.NewLabel("Failed to save configuration."))
+				vbox.Add(retryBtn)
 				return
 			}
 		}
@@ -62,14 +66,16 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 			})
 			if err != nil {
 				slog.Error("Failed to login", "error", err)
-				vbox.Add(widget.NewLabel("Failed to login. Please try again later."))
+				vbox.Add(widget.NewLabel("Failed to login."))
+				vbox.Add(retryBtn)
 				return
 			}
 			slog.Info("Login successful")
 			_, err = Phoning("GET", m.config.ApiKey, m.config.AccessToken, "/fan/v1.0/users/me")
 			if err != nil {
 				slog.Error("Failed to validate configuration", "error", err)
-				vbox.Add(widget.NewLabel("Failed to validate configuration. Please try again later."))
+				vbox.Add(widget.NewLabel("Failed to validate configuration."))
+				vbox.Add(retryBtn)
 				return
 			}
 		}
@@ -79,6 +85,12 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 		})
 		vbox.Add(widget.NewLabel("Configuration loaded successfully!"))
 	}
+	retryBtn = widget.NewButton("Retry", func() {
+		vbox.RemoveAll()
+		vbox.Add(title)
+		vbox.Add(progress)
+		go validateConfig()
+	})
 	go validateConfig()
 	return vbox
 }
