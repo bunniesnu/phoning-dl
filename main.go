@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 )
@@ -25,6 +27,7 @@ func main() {
 	// Main screen
 	go func() {
 		<-done
+		time.Sleep(100 * time.Millisecond)
 		fyne.Do(func() {
 			w.SetContent(m.MainScreen())
 			w.Resize(mainSize)
