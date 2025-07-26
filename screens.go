@@ -84,6 +84,7 @@ func (m *App) LoadingConfigScreen() *fyne.Container {
 			progress.Hide()
 		})
 		vbox.Add(widget.NewLabel("Configuration loaded successfully!"))
+		fyne.Do((*m.w).Close)
 	}
 	retryBtn = widget.NewButton("Retry", func() {
 		vbox.RemoveAll()
