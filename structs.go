@@ -36,4 +36,45 @@ type Live struct {
 	Duration    time.Duration
 	IsLandscape bool
 	Selected	bool
+	PNXMLInfo	*PNXMLInfo
+}
+
+type MetaData struct {
+	Bitrate int
+	FPS 	string
+	Codec 	string
+	Width 	int
+	Height 	int
+	URL 	string
+}
+
+type PNXMLInfo struct {
+	MaxHeight int
+	MetaDatas []MetaData
+	ImageURL  string
+}
+
+type PNXMLJSON struct {
+	Period []struct {
+		AdaptationSet []struct {
+			MaxHeight    float64 `json:"maxHeight"`
+			Representation []struct {
+				BaseURL []struct {
+					Value string `json:"value"`
+				}
+				Width int `json:"width"`
+				Height int `json:"height"`
+				BandWidth int `json:"bandwidth"`
+				FrameRate string `json:"frameRate"`
+				Codec string `json:"codecs"`
+			} `json:"representation"`
+		} `json:"adaptationSet"`
+		SupplementalProperty []struct {
+			Any []struct {
+				Cover []struct {
+					Value string `json:"value"`
+				} `json:"cover,omitempty"`
+			} `json:"any"`
+		} `json:"supplementalProperty"`
+	} `json:"period"`
 }

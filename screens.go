@@ -122,6 +122,9 @@ func (m *App) MainScreen() *fyne.Container {
 			return
 		}
 		slog.Info("Lives fetched successfully", "count", len(*lives))
+		cnt := 0
+		progress := widget.NewProgressBar()
+		vbox.Add(progress)
 		decodeFailed := false
 		parseFunc := func(live LiveJSON, ctx context.Context) (*Live, error) {
 			startAtParse, err := time.Parse(time.RFC3339Nano, live.StartAt)
@@ -134,6 +137,11 @@ func (m *App) MainScreen() *fyne.Container {
 				slog.Error("Failed to parse endAt", "error", err, "endAt", live.EndAt)
 				return nil, err
 			}
+			pnxmlData, err := getPNXML(m.config.ApiKey, m.config.AccessToken, live.Id)
+			if err != nil {
+				slog.Error("Failed to get PNXML data", "error", err, "liveId", live.Id)
+				return nil, err
+			}
 			liveReturn := new(Live)
 			*liveReturn = Live{
 				Id:       live.Id,
@@ -144,7 +152,12 @@ func (m *App) MainScreen() *fyne.Container {
 				EndAt:   endAtParse,
 				Duration: time.Duration(live.Duration) * time.Millisecond,
 				IsLandscape: live.ScreenOrientation == "LANDSCAPE",
+				PNXMLInfo: pnxmlData,
 			}
+			fyne.Do(func(){
+				cnt++
+				progress.SetValue(float64(cnt) / float64(len(*lives)))
+			})
 			return liveReturn, nil
 		}
 		liveSelectionTmp, err := concurrentExecute(parseFunc, *lives, DefaultConcurrency)
@@ -152,6 +165,7 @@ func (m *App) MainScreen() *fyne.Container {
 			slog.Error("Failed to decode lives", "error", err)
 			decodeFailed = true
 		}
+		slog.Info("Lives decoded successfully", "count", len(liveSelectionTmp))
 		*liveSelection = make([]Live, len(liveSelectionTmp))
 		for _, live := range liveSelectionTmp {
 			if live != nil {
