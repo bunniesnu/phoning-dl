@@ -167,28 +167,10 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 		return "", err
 	}
 	req, err := http.NewRequest("POST", "https://sdk.weverse.io/api/v2/auth/token/by-credentials", strings.NewReader(string(encodedBody)))
-	var DefaultHeaders = map[string]string{
-		"Host": "sdk.weverse.io",
-		"Accept": "*/*",
-		"X-SDK-SERVICE-ID": "phoning",
-		"X-SDK-LANGUAGE": "ko",
-		"X-CLOG-USER-DEVICE-ID": "1",
-		"X-SDK-PLATFORM": "iOS",
-		"Accept-Language": "ko-KR,ko;q=0.9",
-		"Accept-Encoding": "gzip, deflate, br",
-		"Content-Type": "application/json",
-		"X-SDK-VERSION": "3.4.2",
-		"User-Agent": "Phoning/20201014 CFNetwork/3826.500.131 Darwin/24.5.0",
-		"Connection": "keep-alive",
-		"X-SDK-TRACE-ID": "1",
-		"X-SDK-APP-VERSION": "2.2.1",
-		"Pragma": "no-cache",
-		"Cache-Control": "no-cache",
-		"X-SDK-SERVICE-SECRET": os.Getenv("PHONING_SDK_SERVICE_SECRET"),
-	}
-	for key, value := range DefaultHeaders {
+	for key, value := range DefaultWevSDKHeaders {
 		req.Header.Set(key, value)
 	}
+	req.Header.Set("X-SDK-SERVICE-SECRET", os.Getenv("PHONING_SDK_SERVICE_SECRET"))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {

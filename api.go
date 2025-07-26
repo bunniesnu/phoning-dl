@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -38,17 +39,8 @@ func hash(url, apikey string) map[string]string {
 }
 
 func getAPIHeaders(accessToken string) map[string]string {
-	header := map[string]string{
-		"Host": "apis.naver.com",
-		"Content-Type": "application/json; charset=utf-8",
-		"X-Client-Name": "IOS",
-		"X-Client-Version": "2.1.2",
-		"Connection": "keep-alive",
-		"Accept": "application/json",
-		"Accept-Language": "ko-KR,ko;q=0.9",
-		"Accept-Encoding": "gzip, deflate, br",
-		"User-Agent": "Phoning/20102019 CFNetwork/1496.0.7 Darwin/23.5.0",
-	}
+	header := make(map[string]string)
+	maps.Copy(header, DefaultAPIHeaders)
 	if accessToken != "" {
 		header["Authorization"] = "Bearer " + accessToken
 	}
