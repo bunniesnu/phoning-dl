@@ -29,7 +29,6 @@ func main() {
 		<-done
 		time.Sleep(100 * time.Millisecond)
 		fyne.Do(func() {
-			w.SetContent(m.MainScreen())
 			w.Resize(size)
 			screen = m.MainScreen()
 			w.SetContent(screen)

@@ -192,3 +192,48 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	updateProgress("Access token generated successfully", 0.8)
 	return accessToken, int64(expiresIn), nil
 }
+
+func (m *App) FetchLives() (*[]LiveJSON, error) {
+	var callsData *[]LiveJSON = new([]LiveJSON)
+	nextCursor := ""
+	cnt := 0
+	for {
+		cnt++
+		if cnt > 10 {
+			return nil, fmt.Errorf("too many iterations, stopping to prevent infinite loop")
+		}
+		params := map[string]string{"limit": "100"}
+		if nextCursor != "" {
+			params["cursor"] = nextCursor
+		}
+		calls, err := Phoning("GET", m.config.ApiKey, m.config.AccessToken, "/fan/v1.0/lives", params)
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+		rawData, ok := calls["data"].([]any)
+		if !ok {
+			log.Fatalf("Unexpected data format: %T", calls["data"])
+		}
+		for _, item := range rawData {
+			itemBytes, err := json.Marshal(item)
+			if err != nil {
+				log.Fatalf("Error marshaling item: %v", err)
+			}
+			var live LiveJSON
+			if err := json.Unmarshal(itemBytes, &live); err != nil {
+				log.Fatalf("Error unmarshaling item to LiveJSON: %v", err)
+			}
+			*callsData = append(*callsData, live)
+		}
+		cursors, ok := calls["cursors"].(map[string]any)
+		if !ok {
+			log.Fatalf("Unexpected cursors format: %T", calls["cursors"])
+		}
+		next, ok := cursors["next"].(string)
+		if !ok {
+			break
+		}
+		nextCursor = next
+	}
+	return callsData, nil
+}

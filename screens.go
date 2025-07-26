@@ -100,9 +100,70 @@ func (m *App) LoadingConfigScreen(done chan struct{}) *fyne.Container {
 }
 
 func (m *App) MainScreen() *fyne.Container {
-	title := widget.NewLabel("PhoningDL")
+	liveSelection := make([]Live, 0)
+	slog.Info("Loading main screen")
+	fetchingLiveLabel := widget.NewLabel("Fetching lives...")
 	vbox := container.NewVBox(
-		title,
+		fetchingLiveLabel,
 	)
+	retryBtn := new(widget.Button)
+	loadFunc := func() {
+		lives, err := m.FetchLives()
+		if err != nil {
+			slog.Error("Failed to fetch lives", "error", err)
+			fyne.Do(func() {
+				vbox.RemoveAll()
+				vbox.Add(widget.NewLabel("Failed to fetch lives."))
+				vbox.Add(retryBtn)
+				vbox.Refresh()
+			})
+			return
+		}
+		slog.Info("Lives fetched successfully", "count", len(*lives))
+		decodeFailed := false
+		for _, live := range *lives {
+			startAtParse, err := time.Parse(time.RFC3339Nano, live.StartAt)
+			if err != nil {
+				slog.Error("Failed to parse startAt", "error", err, "startAt", live.StartAt)
+				decodeFailed = true
+				break
+			}
+			endAtParse, err := time.Parse(time.RFC3339Nano, live.EndAt)
+			if err != nil {
+				slog.Error("Failed to parse endAt", "error", err, "endAt", live.EndAt)
+				decodeFailed = true
+				break
+			}
+			liveSelection = append(liveSelection, Live{
+				Id:       live.Id,
+				Title:    live.Title,
+				Selected: true,
+				IsVideo:  live.MediaType == "LIVE",
+				StartAt: startAtParse,
+				EndAt:   endAtParse,
+				Duration: time.Duration(live.Duration) * time.Millisecond,
+				IsLandscape: live.ScreenOrientation == "LANDSCAPE",
+			})
+		}
+		fyne.Do(func() {
+			vbox.RemoveAll()
+			if decodeFailed {
+				vbox.Add(widget.NewLabel("Failed to decode lives."))
+				vbox.Add(retryBtn)
+			} else {
+				vbox.Add(widget.NewLabel("Lives fetched successfully!"))
+			}
+			vbox.Refresh()
+		})
+	}
+	retryBtn = widget.NewButton("Retry", func() {
+		fyne.Do(func() {
+			vbox.RemoveAll()
+			vbox.Add(fetchingLiveLabel)
+			vbox.Refresh()
+		})
+		loadFunc()
+	})
+	go loadFunc()
 	return vbox
 }
