@@ -30,7 +30,6 @@ func DrawList(lives *[]Live, height float32, refresh func()) (*container.Scroll,
 		vbox.Add(checkBox)
 		vbox.Add(widget.NewLabel(live.Title))
 		vbox.Add(widget.NewLabel(live.StartAt.Format(DateTimeFormat)))
-		vbox.Add(widget.NewLabel(live.EndAt.Format(DateTimeFormat)))
 		durationHours := int(live.Duration.Hours())
 		durationMinutes := int(live.Duration.Minutes()) % 60
 		durationSeconds := int(live.Duration.Seconds()) % 60
@@ -39,6 +38,16 @@ func DrawList(lives *[]Live, height float32, refresh func()) (*container.Scroll,
 		} else {
 			vbox.Add(widget.NewLabel(fmt.Sprintf("%d:%02d:%02d", durationHours, durationMinutes, durationSeconds)))
 		}
+		metaDatas := &live.PNXMLInfo.MetaDatas
+		formats := make([]string, 0, len(*metaDatas))
+		for _, metaData := range *metaDatas {
+			formats = append(formats, fmt.Sprintf("%d", metaData.Height))
+		}
+		selectSize := widget.NewSelect(formats, func(s string) {
+			live.SelHeight, _ = strconv.Atoi(s)
+		})
+		selectSize.SetSelected(strconv.Itoa(live.SelHeight))
+		vbox.Add(selectSize)
 	}
 	scrollable := container.NewVScroll(vbox)
 	scrollable.SetMinSize(fyne.NewSize(0, height))

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"sort"
 	"strconv"
 )
 
@@ -74,6 +75,9 @@ func getPNXML(apiKey, accessToken string, id int) (*PNXMLInfo, error) {
 			pnxmlData.MetaDatas = append(pnxmlData.MetaDatas, res)
 		}
 	}
+	sort.Slice(pnxmlData.MetaDatas, func(i, j int) bool {
+		return pnxmlData.MetaDatas[i].Height > pnxmlData.MetaDatas[j].Height
+	})
 	for _, sup := range pnxmlJSON.Period[0].SupplementalProperty[0].Any {
 		if len(sup.Cover) > 0 {
 			pnxmlData.ImageURL = sup.Cover[0].Value

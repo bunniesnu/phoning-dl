@@ -143,10 +143,17 @@ func (m *App) MainScreen() *fyne.Container {
 				return nil, err
 			}
 			liveReturn := new(Live)
+			maxSize := 0
+			for _, metaData := range pnxmlData.MetaDatas {
+				if metaData.Height > maxSize {
+					maxSize = metaData.Height
+				}
+			}
 			*liveReturn = Live{
 				Id:       live.Id,
 				Title:    live.Title,
 				Selected: true,
+				SelHeight: maxSize,
 				IsVideo:  live.MediaType == "LIVE",
 				StartAt: startAtParse,
 				EndAt:   endAtParse,

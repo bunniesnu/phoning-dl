@@ -36,6 +36,7 @@ type Live struct {
 	Duration    time.Duration
 	IsLandscape bool
 	Selected	bool
+	SelHeight	int
 	PNXMLInfo	*PNXMLInfo
 }
 
