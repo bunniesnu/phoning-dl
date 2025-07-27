@@ -6,8 +6,6 @@ import (
 	"path"
 )
 
-const ConfigFileName = "config.json"
-
 func (m *App) LoadConfig() error {
 	configDir, err := os.UserConfigDir()
 	if err != nil {

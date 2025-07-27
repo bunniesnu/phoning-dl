@@ -3,10 +3,12 @@ package main
 const (
 	AppName		    		 = "phoningdl"
 	DefaultWindowTitle  	 = "PhoningDL"
+	ConfigFileName			 = "config.json"
 	DefaultWindowWidth  	 = 800
 	DefaultWindowHeight 	 = 600
 	InnerHeight				 = 300
 	DefaultFetchConcurrency  = 100
+	DownloadListColNum		 = 5
 )
 
 var DefaultWevSDKHeaders = map[string]string{

@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-const TableColNum = 5
+const TableColNum = DownloadListColNum
 const DateTimeFormat = "2006-01-02 15:04:05"
 
 func DrawList(lives *[]Live, height float32, refresh func()) (*container.Scroll, []*widget.Check) {
