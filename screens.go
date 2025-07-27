@@ -160,7 +160,7 @@ func (m *App) MainScreen() *fyne.Container {
 			})
 			return liveReturn, nil
 		}
-		liveSelectionTmp, err := concurrentExecute(parseFunc, *lives, DefaultConcurrency)
+		liveSelectionTmp, err := concurrentExecute(parseFunc, *lives, DefaultFetchConcurrency)
 		if err != nil {
 			slog.Error("Failed to decode lives", "error", err)
 			decodeFailed = true
