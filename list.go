@@ -13,20 +13,21 @@ const TableColNum = 5
 func DrawList(lives *[]Live, height float32, refresh func()) *container.Scroll {
 	vbox := container.NewGridWithColumns(TableColNum)
 	for i := 0; i < len(*lives); i++ {
-		checkBox := widget.NewCheck(strconv.Itoa((*lives)[i].Id),
+		live := &(*lives)[i]
+		checkBox := widget.NewCheck(strconv.Itoa(live.Id),
 			func(b bool) {
-				(*lives)[i].Selected = b
+				live.Selected = b
 				if refresh != nil {
 					refresh()
 				}
 			},
 		)
-		checkBox.SetChecked((*lives)[i].Selected)
+		checkBox.SetChecked(live.Selected)
 		vbox.Add(checkBox)
-		vbox.Add(widget.NewLabel((*lives)[i].Title))
-		vbox.Add(widget.NewLabel((*lives)[i].StartAt.Format("15:04:05")))
-		vbox.Add(widget.NewLabel((*lives)[i].EndAt.Format("15:04:05")))
-		vbox.Add(widget.NewLabel((*lives)[i].Duration.String()))
+		vbox.Add(widget.NewLabel(live.Title))
+		vbox.Add(widget.NewLabel(live.StartAt.Format("15:04:05")))
+		vbox.Add(widget.NewLabel(live.EndAt.Format("15:04:05")))
+		vbox.Add(widget.NewLabel(live.Duration.String()))
 	}
 	scrollable := container.NewVScroll(vbox)
 	scrollable.SetMinSize(fyne.NewSize(0, height))
