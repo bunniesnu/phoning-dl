@@ -42,7 +42,7 @@ func DrawList(lives *[]Live, height float32, refresh func()) (*container.Scroll,
 		formats := make([]string, 0, len(*metaDatas))
 		labels := map[int]string{}
 		for _, metaData := range *metaDatas {
-			label := fmt.Sprintf("%d x %d", metaData.Width, metaData.Height)
+			label := fmt.Sprintf("%d x %d (%s)", metaData.Width, metaData.Height, formatBytes(metaData.Size))
 			formats = append(formats, label)
 			labels[metaData.Height] = label
 		}
@@ -52,6 +52,9 @@ func DrawList(lives *[]Live, height float32, refresh func()) (*container.Scroll,
 					live.SelHeight = k
 					break
 				}
+			}
+			if refresh != nil {
+				refresh()
 			}
 		})
 		selectSize.SetSelected(labels[live.SelHeight])

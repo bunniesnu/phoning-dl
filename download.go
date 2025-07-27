@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -10,10 +11,15 @@ import (
 )
 
 func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.CanvasObject {
-	label := widget.NewLabel(fmt.Sprintf("Selected: %d / %d", getSelectedNum(liveSelection), len(*livesData)))
+	selNum, totalSize := getSelectedNum(liveSelection)
+	totalSizeLabel := widget.NewLabel(fmt.Sprintf("Total Size: %s", formatBytes(totalSize)))
+	label := widget.NewLabel(fmt.Sprintf("Selected: %d / %d", selNum, len(*livesData)))
 	refreshLabel := func() {
-		label.SetText(fmt.Sprintf("Selected: %d / %d", getSelectedNum(liveSelection), len(*livesData)))
+		selNum, totalSize := getSelectedNum(liveSelection)
+		label.SetText(fmt.Sprintf("Selected: %d / %d", selNum, len(*livesData)))
 		label.Refresh()
+		totalSizeLabel.SetText(fmt.Sprintf("Total Size: %s", formatBytes(totalSize)))
+		totalSizeLabel.Refresh()
 	}
 	list, checks := DrawList(liveSelection, InnerHeight, refreshLabel)
 	header := container.NewHBox(
@@ -34,9 +40,17 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 			refreshLabel()
 		}),
 	)
+	footer := container.NewHBox(
+		totalSizeLabel,
+		layout.NewSpacer(),
+		widget.NewButton("Download", func() {
+			slog.Info("Starting download")
+		}),
+	)
 	vbox := container.NewVBox(
 		header,
 		list,
+		footer,
 	)
 	return vbox
 }

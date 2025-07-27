@@ -238,14 +238,21 @@ func (m *App) FetchLives() (*[]LiveJSON, error) {
 	return callsData, nil
 }
 
-func getSelectedNum(liveSelection *[]Live) int {
+func getSelectedNum(liveSelection *[]Live) (int, int64) {
 	selectedCount := 0
+	totalSize := int64(0)
 	for _, live := range *liveSelection {
 		if live.Selected {
 			selectedCount++
+			for _, metaData := range live.PNXMLInfo.MetaDatas {
+				if metaData.Height == live.SelHeight {
+					totalSize += metaData.Size
+					break
+				}
+			}
 		}
 	}
-	return selectedCount
+	return selectedCount, totalSize
 }
 
 func getFileSizeWithContext(url string, ctx context.Context) (int64, error) {
@@ -262,4 +269,17 @@ func getFileSizeWithContext(url string, ctx context.Context) (int64, error) {
 		return 0, fmt.Errorf("received non-200 response: %d", resp.StatusCode)
 	}
 	return resp.ContentLength, nil
+}
+
+func formatBytes(size int64) string {
+	const unit = 1024
+	if size < unit {
+		return fmt.Sprintf("%d B", size)
+	}
+	div, exp := int64(unit), 0
+	for n := size / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %ciB", float64(size)/float64(div), "KMGTPE"[exp])
 }
