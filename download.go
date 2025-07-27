@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
@@ -40,9 +41,29 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 			refreshLabel()
 		}),
 	)
+	var downloadFolder string
+	downloadFolderLabel := widget.NewLabel("Download Folder: Not selected")
+	downloadFolderDialog := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
+		if err != nil {
+			dialog.ShowError(err, *m.w)
+			return
+		}
+		if uri != nil {
+			slog.Info("Download folder selected", "path", uri.Path())
+			downloadFolder = uri.Path()
+			downloadFolderLabel.SetText(fmt.Sprintf("Download Folder: %s", downloadFolder))
+			downloadFolderLabel.Refresh()
+		}
+	}, *m.w)
+	downloadFolderPrompt := widget.NewButton("Select Download Folder", func() {
+		slog.Info("Opening download folder dialog")
+		downloadFolderDialog.Show()
+	})
 	footer := container.NewHBox(
 		totalSizeLabel,
 		layout.NewSpacer(),
+		downloadFolderLabel,
+		downloadFolderPrompt,
 		widget.NewButton("Download", func() {
 			slog.Info("Starting download")
 		}),
