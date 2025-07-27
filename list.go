@@ -40,13 +40,21 @@ func DrawList(lives *[]Live, height float32, refresh func()) (*container.Scroll,
 		}
 		metaDatas := &live.PNXMLInfo.MetaDatas
 		formats := make([]string, 0, len(*metaDatas))
+		labels := map[int]string{}
 		for _, metaData := range *metaDatas {
-			formats = append(formats, fmt.Sprintf("%d", metaData.Height))
+			label := fmt.Sprintf("%d x %d", metaData.Width, metaData.Height)
+			formats = append(formats, label)
+			labels[metaData.Height] = label
 		}
 		selectSize := widget.NewSelect(formats, func(s string) {
-			live.SelHeight, _ = strconv.Atoi(s)
+			for k, v := range labels {
+				if v == s {
+					live.SelHeight = k
+					break
+				}
+			}
 		})
-		selectSize.SetSelected(strconv.Itoa(live.SelHeight))
+		selectSize.SetSelected(labels[live.SelHeight])
 		vbox.Add(selectSize)
 	}
 	scrollable := container.NewVScroll(vbox)
