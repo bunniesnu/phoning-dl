@@ -2,6 +2,7 @@ package main
 
 const (
 	AppName		    		 = "phoningdl"
+	AppID					 = "com.bunniesnu.phoningdl"
 	DefaultWindowTitle  	 = "PhoningDL"
 	ConfigFileName			 = "config.json"
 	DefaultWindowWidth  	 = 800

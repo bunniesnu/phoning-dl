@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// Initialize
-	a := app.New()
+	a := app.NewWithID(AppID)
 	w := a.NewWindow(DefaultWindowTitle)
 	size := fyne.NewSize(DefaultWindowWidth, DefaultWindowHeight)
 	w.Resize(size)
