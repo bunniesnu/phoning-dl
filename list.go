@@ -8,8 +8,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+const TableColNum = 5
+
 func DrawList(lives *[]Live, height float32, refresh func()) *container.Scroll {
-	items := make([]fyne.CanvasObject, len(*lives))
+	vbox := container.NewGridWithColumns(TableColNum)
 	for i := 0; i < len(*lives); i++ {
 		checkBox := widget.NewCheck(strconv.Itoa((*lives)[i].Id),
 			func(b bool) {
@@ -20,16 +22,12 @@ func DrawList(lives *[]Live, height float32, refresh func()) *container.Scroll {
 			},
 		)
 		checkBox.SetChecked((*lives)[i].Selected)
-		item := container.NewHBox(
-			checkBox,
-			widget.NewLabel((*lives)[i].Title),
-			widget.NewLabel((*lives)[i].StartAt.Format("15:04:05")),
-			widget.NewLabel((*lives)[i].EndAt.Format("15:04:05")),
-			widget.NewLabel((*lives)[i].Duration.String()),
-		)
-		items[i] = item
+		vbox.Add(checkBox)
+		vbox.Add(widget.NewLabel((*lives)[i].Title))
+		vbox.Add(widget.NewLabel((*lives)[i].StartAt.Format("15:04:05")))
+		vbox.Add(widget.NewLabel((*lives)[i].EndAt.Format("15:04:05")))
+		vbox.Add(widget.NewLabel((*lives)[i].Duration.String()))
 	}
-	vbox := container.NewVBox(items...)
 	scrollable := container.NewVScroll(vbox)
 	scrollable.SetMinSize(fyne.NewSize(0, height))
 	return scrollable
