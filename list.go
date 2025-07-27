@@ -10,8 +10,9 @@ import (
 
 const TableColNum = 5
 
-func DrawList(lives *[]Live, height float32, refresh func()) *container.Scroll {
+func DrawList(lives *[]Live, height float32, refresh func()) (*container.Scroll, []*widget.Check) {
 	vbox := container.NewGridWithColumns(TableColNum)
+	checks := make([]*widget.Check, 0, len(*lives))
 	for i := 0; i < len(*lives); i++ {
 		live := &(*lives)[i]
 		checkBox := widget.NewCheck(strconv.Itoa(live.Id),
@@ -23,6 +24,7 @@ func DrawList(lives *[]Live, height float32, refresh func()) *container.Scroll {
 			},
 		)
 		checkBox.SetChecked(live.Selected)
+		checks = append(checks, checkBox)
 		vbox.Add(checkBox)
 		vbox.Add(widget.NewLabel(live.Title))
 		vbox.Add(widget.NewLabel(live.StartAt.Format("15:04:05")))
@@ -31,5 +33,5 @@ func DrawList(lives *[]Live, height float32, refresh func()) *container.Scroll {
 	}
 	scrollable := container.NewVScroll(vbox)
 	scrollable.SetMinSize(fyne.NewSize(0, height))
-	return scrollable
+	return scrollable, checks
 }

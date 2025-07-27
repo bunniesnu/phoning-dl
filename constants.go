@@ -1,11 +1,11 @@
 package main
 
 const (
-	AppName		    	= "phoningdl"
-	DefaultWindowTitle  = "PhoningDL"
-	DefaultWindowWidth  = 800
-	DefaultWindowHeight = 600
-	InnerHeight			= 300
+	AppName		    		 = "phoningdl"
+	DefaultWindowTitle  	 = "PhoningDL"
+	DefaultWindowWidth  	 = 800
+	DefaultWindowHeight 	 = 600
+	InnerHeight				 = 300
 	DefaultFetchConcurrency  = 100
 )
 
