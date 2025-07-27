@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -44,16 +45,33 @@ func getPNXML(apiKey, accessToken string, id int) (*PNXMLInfo, error) {
 	
 	pnxmlData.MaxHeight = int(pnxmlJSON.Period[0].AdaptationSet[0].MaxHeight)
 	for _, adaptation := range pnxmlJSON.Period[0].AdaptationSet {
-		for _, representation := range adaptation.Representation {
-			metaData := MetaData{
-				Bitrate: int(representation.BandWidth),
-				FPS:     representation.FrameRate,
-				Codec:   representation.Codec,
-				Width:   int(representation.Width),
-				Height:  int(representation.Height),
-				URL:     representation.BaseURL[0].Value,
+		if adaptation.MimeType != "video/mp4" {
+			continue
+		}
+		getMetaData := func(rep Representation, ctx context.Context) (MetaData, error) {
+			size, err := getFileSizeWithContext(rep.BaseURL[0].Value, ctx)
+			if err != nil {
+				slog.Error("Failed to get file size", "error", err, "url", rep.BaseURL[0].Value)
+				return MetaData{}, err
 			}
-			pnxmlData.MetaDatas = append(pnxmlData.MetaDatas, metaData)
+			return MetaData{
+				Bitrate:   rep.BandWidth,
+				FPS:       rep.FrameRate,
+				Codec:     rep.Codec,
+				Width:     rep.Width,
+				Height:    rep.Height,
+				URL:       rep.BaseURL[0].Value,
+				Size:      size,
+			}, nil
+		}
+		concurrentRes, err := concurrentExecuteAny(getMetaData, adaptation.Representation, len(adaptation.Representation))
+		if err != nil {
+			slog.Error("Failed to decode representations", "error", err)
+			return nil, err
+		}
+		pnxmlData.MetaDatas = make([]MetaData, 0, len(concurrentRes))
+		for _, res := range concurrentRes {
+			pnxmlData.MetaDatas = append(pnxmlData.MetaDatas, res)
 		}
 	}
 	for _, sup := range pnxmlJSON.Period[0].SupplementalProperty[0].Any {

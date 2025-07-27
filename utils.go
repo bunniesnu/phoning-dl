@@ -247,3 +247,19 @@ func getSelectedNum(liveSelection *[]Live) int {
 	}
 	return selectedCount
 }
+
+func getFileSizeWithContext(url string, ctx context.Context) (int64, error) {
+	req, err := http.NewRequestWithContext(ctx, "HEAD", url, nil)
+	if err != nil {
+		return 0, fmt.Errorf("error creating request: %v", err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 0, fmt.Errorf("error making HEAD request: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("received non-200 response: %d", resp.StatusCode)
+	}
+	return resp.ContentLength, nil
+}

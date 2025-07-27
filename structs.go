@@ -46,6 +46,7 @@ type MetaData struct {
 	Width 	int
 	Height 	int
 	URL 	string
+	Size 	int64
 }
 
 type PNXMLInfo struct {
@@ -54,20 +55,23 @@ type PNXMLInfo struct {
 	ImageURL  string
 }
 
+type Representation struct {
+	BaseURL []struct {
+		Value string `json:"value"`
+	}
+	Width int `json:"width"`
+	Height int `json:"height"`
+	BandWidth int `json:"bandwidth"`
+	FrameRate string `json:"frameRate"`
+	Codec string `json:"codecs"`
+}
+
 type PNXMLJSON struct {
 	Period []struct {
 		AdaptationSet []struct {
 			MaxHeight    float64 `json:"maxHeight"`
-			Representation []struct {
-				BaseURL []struct {
-					Value string `json:"value"`
-				}
-				Width int `json:"width"`
-				Height int `json:"height"`
-				BandWidth int `json:"bandwidth"`
-				FrameRate string `json:"frameRate"`
-				Codec string `json:"codecs"`
-			} `json:"representation"`
+			MimeType     string  `json:"mimeType"`
+			Representation []Representation `json:"representation"`
 		} `json:"adaptationSet"`
 		SupplementalProperty []struct {
 			Any []struct {
