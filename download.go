@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -64,7 +65,11 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 		layout.NewSpacer(),
 		downloadFolderLabel,
 		downloadFolderPrompt,
-		widget.NewButton("Download", func() {
+		widget.NewButtonWithIcon("Download", theme.DownloadIcon(), func() {
+			if downloadFolder == "" {
+				dialog.ShowError(fmt.Errorf("Please select a download folder"), *m.w)
+				return
+			}
 			slog.Info("Starting download")
 		}),
 	)
