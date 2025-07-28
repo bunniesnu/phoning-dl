@@ -7,7 +7,8 @@ const (
 	ConfigFileName			 = "config.json"
 	DefaultWindowWidth  	 = 800
 	DefaultWindowHeight 	 = 600
-	InnerHeight				 = 300
+	DownloadWindowWidth 	 = 600
+	DownloadWindowHeight	 = 400
 	DefaultFetchConcurrency  = 100
 	DownloadListColNum		 = 5
 )

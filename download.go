@@ -23,7 +23,7 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 		totalSizeLabel.SetText(fmt.Sprintf("Total Size: %s", formatBytes(totalSize)))
 		totalSizeLabel.Refresh()
 	}
-	list, checks := DrawList(liveSelection, InnerHeight, refreshLabel)
+	list, checks := DrawList(liveSelection, DownloadWindowHeight, refreshLabel)
 	header := container.NewHBox(
 		label,
 		layout.NewSpacer(),
@@ -71,6 +71,7 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 				return
 			}
 			slog.Info("Starting download")
+			go fyne.Do(func() {m.StartDownload(liveSelection, livesData)})
 		}),
 	)
 	vbox := container.NewVBox(
@@ -79,4 +80,19 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 		footer,
 	)
 	return vbox
+}
+
+func (m *App) StartDownload(liveSelection *[]Live, livesData *[]LiveJSON) {
+	w := fyne.CurrentApp().NewWindow("PhoningDL - Download")
+	vbox := container.NewVBox(
+		widget.NewLabel("Starting download..."),
+		widget.NewProgressBar(),
+	)
+	w.SetContent(vbox)
+	w.Resize(fyne.NewSize(DownloadWindowWidth, DownloadWindowHeight))
+	w.SetCloseIntercept(func() {
+		slog.Info("Download window closed")
+		w.Close()
+	})
+	w.Show()
 }
