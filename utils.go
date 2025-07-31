@@ -79,6 +79,7 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	}
 	res := ""
 	for i := range 5 {
+		time.Sleep(5 * time.Second)
 		email, err := gmail.GetMails()
 		if err != nil {
 			return "", 0, fmt.Errorf("error getting emails: %v", err)
@@ -113,7 +114,6 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 			break
 		}
 		updateProgress(fmt.Sprintf("Checking for verification email (%d/5)", i+1), 0.3+float64(i+1)*0.02)
-		time.Sleep(5 * time.Second)
 	}
 	if res == "" {
 		return "", 0, fmt.Errorf("verification link not found in any emails")
@@ -145,6 +145,7 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	updateProgress("Clicked verification link", 0.6)
 
 	// Check if the email is verified
+	time.Sleep(3 * time.Second)
 	val, err := w.GetAccountStatus()
 	if err != nil {
 		return "", 0, fmt.Errorf("error checking verification: %v", err)
