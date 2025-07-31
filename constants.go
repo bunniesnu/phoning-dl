@@ -7,8 +7,9 @@ const (
 	ConfigFileName			 = "config.json"
 	DefaultWindowWidth  	 = 800
 	DefaultWindowHeight 	 = 600
+	ListHeight				 = 400
 	DownloadWindowWidth 	 = 600
-	DownloadWindowHeight	 = 400
+	DownloadWindowHeight	 = 600
 	DefaultFetchConcurrency  = 100
 	DownloadListColNum		 = 5
     MaxAllowedSize			 = 10 * 1024 * 1024 * 1024 // 10 GiB

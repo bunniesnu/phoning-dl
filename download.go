@@ -23,7 +23,7 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 		totalSizeLabel.SetText(fmt.Sprintf("Total Size: %s", formatBytes(totalSize)))
 		totalSizeLabel.Refresh()
 	}
-	list, checks := DrawList(liveSelection, DownloadWindowHeight, refreshLabel)
+	list, checks := DrawList(liveSelection, ListHeight, refreshLabel)
 	header := container.NewHBox(
 		label,
 		layout.NewSpacer(),
