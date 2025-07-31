@@ -10,12 +10,16 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/bunniesnu/go-gmailnator"
 	"github.com/bunniesnu/weverse-api"
 	"github.com/chromedp/chromedp"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -283,4 +287,182 @@ func formatBytes(size int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %ciB", float64(size)/float64(div), "KMGTPE"[exp])
+}
+
+// safeCreateFile ensures destPath is within baseDir and that there is enough free space.
+func safeCreateFile(destPath, baseDir string, size int64) (*os.File, error) {
+    cleanDest := filepath.Clean(destPath)
+
+    absBase, err := filepath.Abs(baseDir)
+    if err != nil {
+        return nil, fmt.Errorf("resolving base dir: %w", err)
+    }
+    absDest, err := filepath.Abs(cleanDest)
+    if err != nil {
+        return nil, fmt.Errorf("resolving dest path: %w", err)
+    }
+
+    rel, err := filepath.Rel(absBase, absDest)
+    if err != nil {
+        return nil, fmt.Errorf("resolving relative path: %w", err)
+    }
+    if rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+        return nil, fmt.Errorf("destination %q is outside of %q", absDest, absBase)
+    }
+
+    freeBytes, err := getDiskFreeSpace(absBase)
+    if err != nil {
+        return nil, fmt.Errorf("%w", err)
+    }
+    if freeBytes < size {
+        return nil, fmt.Errorf("not enough disk space: need %d, have %d", size, freeBytes)
+    }
+
+    outFile, err := os.Create(absDest)
+    if err != nil {
+        return nil, fmt.Errorf("creating file: %w", err)
+    }
+    if err := outFile.Truncate(size); err != nil {
+        outFile.Close()
+        return nil, fmt.Errorf("preallocating file: %w", err)
+    }
+    return outFile, nil
+}
+
+func DownloadVideo(
+	ctx context.Context,
+	url, destPath, baseDir string,
+	concurrency int,
+	updateFunc func(value float64),
+) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	if err != nil {
+		return fmt.Errorf("creating HEAD request: %w", err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("HEAD request failed: %w", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("HEAD returned %s", resp.Status)
+	}
+	length := resp.ContentLength
+	if length <= 0 || length > MaxAllowedSize {
+		return fmt.Errorf("invalid or too large content length: %d", length)
+	}
+	supportRanges := resp.Header.Get("Accept-Ranges") == "bytes"
+
+	outFile, err := safeCreateFile(destPath, baseDir, length)
+	if err != nil {
+		return err
+	}
+	defer outFile.Close()
+
+	var downloaded int64
+	var progressMu sync.Mutex
+
+	updateProgress := func(n int64) {
+		newTotal := atomic.AddInt64(&downloaded, n)
+		progress := float64(newTotal) / float64(length)
+		// Fyne widgets are UI-thread safe from v2.3, so direct SetValue is okay
+		progressMu.Lock()
+		updateFunc(progress)
+		progressMu.Unlock()
+	}
+
+	if !supportRanges || concurrency <= 1 {
+		return singleDownload(ctx, url, outFile, updateProgress)
+	}
+
+	partSize := length / int64(concurrency)
+	eg, ctx := errgroup.WithContext(ctx)
+
+	for i := range concurrency {
+		start := int64(i) * partSize
+		end := start + partSize - 1
+		if i == concurrency-1 {
+			end = length - 1
+		}
+		chunkStart, chunkEnd := start, end
+
+		eg.Go(func() error {
+			var lastErr error
+			for attempt := range MaxRetries {
+				if err := downloadChunk(ctx, url, outFile, chunkStart, chunkEnd, updateProgress); err != nil {
+					lastErr = err
+					time.Sleep(time.Duration(attempt+1) * 500 * time.Millisecond)
+					continue
+				}
+				return nil
+			}
+			return fmt.Errorf("chunk %d-%d failed: %w", chunkStart, chunkEnd, lastErr)
+		})
+	}
+	return eg.Wait()
+}
+
+func singleDownload(ctx context.Context, url string, outFile *os.File, updateProgress func(int64)) error {
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("download failed: %s", resp.Status)
+	}
+
+	buf := make([]byte, 32*1024)
+	for {
+		n, readErr := resp.Body.Read(buf)
+		if n > 0 {
+			if _, err := outFile.Write(buf[:n]); err != nil {
+				return err
+			}
+			updateProgress(int64(n))
+		}
+		if readErr == io.EOF {
+			break
+		}
+		if readErr != nil {
+			return readErr
+		}
+	}
+	return nil
+}
+
+func downloadChunk(ctx context.Context, url string, outFile *os.File, start, end int64, updateProgress func(int64)) error {
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", start, end))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusPartialContent {
+		return fmt.Errorf("expected 206 for range %d-%d, got %d", start, end, resp.StatusCode)
+	}
+
+	buf := make([]byte, 32*1024)
+	offset := start
+	for {
+		n, readErr := resp.Body.Read(buf)
+		if n > 0 {
+			if _, err := outFile.WriteAt(buf[:n], offset); err != nil {
+				return err
+			}
+			offset += int64(n)
+			updateProgress(int64(n))
+		}
+		if readErr == io.EOF {
+			break
+		}
+		if readErr != nil {
+			return readErr
+		}
+	}
+	return nil
 }

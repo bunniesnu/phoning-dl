@@ -11,6 +11,8 @@ const (
 	DownloadWindowHeight	 = 400
 	DefaultFetchConcurrency  = 100
 	DownloadListColNum		 = 5
+    MaxAllowedSize			 = 10 * 1024 * 1024 * 1024 // 10 GiB
+	MaxRetries				 = 3
 )
 
 var DefaultWevSDKHeaders = map[string]string{
