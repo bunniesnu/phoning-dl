@@ -333,7 +333,7 @@ func DownloadVideo(
 	ctx context.Context,
 	url, destPath, baseDir string,
 	concurrency int,
-	updateFunc func(value float64),
+	updateFunc func(value int64),
 ) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	if err != nil {
@@ -363,11 +363,8 @@ func DownloadVideo(
 	var progressMu sync.Mutex
 
 	updateProgress := func(n int64) {
-		newTotal := atomic.AddInt64(&downloaded, n)
-		progress := float64(newTotal) / float64(length)
-		// Fyne widgets are UI-thread safe from v2.3, so direct SetValue is okay
 		progressMu.Lock()
-		updateFunc(progress)
+		updateFunc(atomic.AddInt64(&downloaded, n))
 		progressMu.Unlock()
 	}
 
