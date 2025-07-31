@@ -71,7 +71,7 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 				return
 			}
 			slog.Info("Starting download")
-			go fyne.Do(func() {m.StartDownload(liveSelection, livesData)})
+			go fyne.Do(func() {m.StartDownload(liveSelection)})
 		}),
 	)
 	vbox := container.NewVBox(
@@ -82,14 +82,18 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 	return vbox
 }
 
-func (m *App) StartDownload(liveSelection *[]Live, livesData *[]LiveJSON) {
+func (m *App) StartDownload(liveSelection *[]Live) {
 	w := fyne.CurrentApp().NewWindow("PhoningDL - Download")
+	w.Resize(fyne.NewSize(DownloadWindowWidth, DownloadWindowHeight))
+	selNum, totalSize := getSelectedNum(liveSelection)
+	totalProgress := widget.NewProgressBar()
+	totalProgress.Max = float64(totalSize)
+	completed := 0
 	vbox := container.NewVBox(
-		widget.NewLabel("Starting download..."),
-		widget.NewProgressBar(),
+		widget.NewLabel(fmt.Sprintf("Downloading (%d / %d)", completed, selNum)),
+		totalProgress,
 	)
 	w.SetContent(vbox)
-	w.Resize(fyne.NewSize(DownloadWindowWidth, DownloadWindowHeight))
 	w.SetCloseIntercept(func() {
 		slog.Info("Download window closed")
 		w.Close()
