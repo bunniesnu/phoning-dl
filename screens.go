@@ -105,8 +105,10 @@ func (m *App) MainScreen() *fyne.Container {
 	liveSelection := new([]Live)
 	slog.Info("Loading main screen")
 	fetchingLiveLabel := widget.NewLabel("Fetching lives...")
+	progress := widget.NewProgressBar()
 	vbox := container.NewVBox(
 		fetchingLiveLabel,
+		progress,
 	)
 	retryBtn := new(widget.Button)
 	loadFunc := func() {
@@ -123,8 +125,6 @@ func (m *App) MainScreen() *fyne.Container {
 		}
 		slog.Info("Lives fetched successfully", "count", len(*lives))
 		cnt := 0
-		progress := widget.NewProgressBar()
-		vbox.Add(progress)
 		decodeFailed := false
 		parseFunc := func(live LiveJSON, ctx context.Context) (*Live, error) {
 			startAtParse, err := time.Parse(time.RFC3339Nano, live.StartAt)
