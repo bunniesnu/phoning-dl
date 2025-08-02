@@ -10,6 +10,8 @@ github.com/bunniesnu/gocaptcha v1.0.0 h1:1kFA9um3EHpX6A+zCVYkisi+FOThfWE7nbAMKsw
 github.com/bunniesnu/gocaptcha v1.0.0/go.mod h1:AQDtSbNtmVaOZgzOJ/BMsvfauWphfpZCweGjXqQEwM4=
 github.com/bunniesnu/weverse-api v1.0.0 h1:0F6+kM/ipJqjPp0dpi746NY6G3RS3qqmEDFjwak0s6g=
 github.com/bunniesnu/weverse-api v1.0.0/go.mod h1:nWDlLBAlsXSqYjZtk7R9fKSJhDNMoDPXh5gwmpu9OPg=
+github.com/bunniesnu/weverse-api v1.0.1 h1:IwkyiGZPuIHDXh/5lRvl7QDpczbImKA/fuWk0JqKT70=
+github.com/bunniesnu/weverse-api v1.0.1/go.mod h1:ro6VllxN/e7bVNzOEgCKZH6YNW8cJYDlb3G309pLz6A=
 github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b h1:jJmiCljLNTaq/O1ju9Bzz2MPpFlmiTn0F7LwCoeDZVw=
 github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b/go.mod h1:NItd7aLkcfOA/dcMXvl8p1u+lQqioRMq/SqDp71Pb/k=
 github.com/chromedp/chromedp v0.13.7 h1:vt+mslxscyvUr58eC+6DLSeeo74jpV/HI2nWetjv/W4=

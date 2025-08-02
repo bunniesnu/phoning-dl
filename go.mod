@@ -5,7 +5,7 @@ go 1.24.5
 require (
 	fyne.io/fyne/v2 v2.6.2
 	github.com/bunniesnu/go-gmailnator v1.0.1
-	github.com/bunniesnu/weverse-api v1.0.0
+	github.com/bunniesnu/weverse-api v1.0.1
 	github.com/chromedp/chromedp v0.13.7
 	golang.org/x/sync v0.16.0
 	golang.org/x/sys v0.33.0
