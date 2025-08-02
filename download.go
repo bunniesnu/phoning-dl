@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"os"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -70,8 +71,12 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 				dialog.ShowError(fmt.Errorf("Please select a download folder"), *m.w)
 				return
 			}
+			if info, err := os.Stat(downloadFolder); err != nil || !info.IsDir() {
+				dialog.ShowError(fmt.Errorf("Invalid download folder selected"), *m.w)
+				return
+			}
 			slog.Info("Starting download")
-			go fyne.Do(func() {m.StartDownload(liveSelection)})
+			go fyne.Do(func() {m.StartDownload(liveSelection, downloadFolder)})
 		}),
 	)
 	vbox := container.NewVBox(
@@ -82,20 +87,31 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 	return vbox
 }
 
-func (m *App) StartDownload(liveSelection *[]Live) {
+func (m *App) StartDownload(liveSelection *[]Live, baseDir string) {
 	w := fyne.CurrentApp().NewWindow("PhoningDL - Download")
 	w.Resize(fyne.NewSize(DownloadWindowWidth, DownloadWindowHeight))
 	selNum, totalSize := getSelectedNum(liveSelection)
 	totalProgress := widget.NewProgressBar()
 	totalProgress.Max = float64(totalSize)
 	completed := 0
+	progressLabel := widget.NewLabel(fmt.Sprintf("Downloading (%d / %d)", completed, selNum))
+	update := func() {
+		completed++
+		fyne.Do(func(){progressLabel.SetText(fmt.Sprintf("Downloading (%d / %d)", completed, selNum))})
+	}
+	onProgress := func(progressDelta int64) {
+		fyne.Do(func(){totalProgress.SetValue(totalProgress.Value + float64(progressDelta))})
+	}
+	detailsVbox, cancel := DownloadConcurrentList(liveSelection, update, baseDir, onProgress)
 	vbox := container.NewVBox(
-		widget.NewLabel(fmt.Sprintf("Downloading (%d / %d)", completed, selNum)),
+		progressLabel,
 		totalProgress,
+		detailsVbox,
 	)
 	w.SetContent(vbox)
 	w.SetCloseIntercept(func() {
 		slog.Info("Download window closed")
+		cancel()
 		w.Close()
 	})
 	w.Show()

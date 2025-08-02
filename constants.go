@@ -12,6 +12,7 @@ const (
 	DownloadWindowHeight	 = 600
 	DefaultFetchConcurrency  = 100
 	DownloadListColNum		 = 5
+	DefaultConcurrency	 	 = 10
     MaxAllowedSize			 = 10 * 1024 * 1024 * 1024 // 10 GiB
 	MaxRetries				 = 3
 )
