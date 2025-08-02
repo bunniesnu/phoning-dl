@@ -110,9 +110,14 @@ func (m *App) StartDownload(liveSelection *[]Live, baseDir string) {
 	)
 	w.SetContent(vbox)
 	w.SetCloseIntercept(func() {
-		slog.Info("Download window closed")
-		cancel()
-		w.Close()
+		slog.Info("User requested download cancel")
+		dialog.ShowConfirm("Confirm", "Are you sure you want to cancel the download?", func(confirm bool) {
+			if confirm {
+				slog.Info("User confirmed download cancel")
+				cancel()
+				w.Close()
+			}
+		}, w)
 	})
 	w.Show()
 }
