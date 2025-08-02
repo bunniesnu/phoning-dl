@@ -5,9 +5,9 @@ const (
 	AppID					 = "com.bunniesnu.phoningdl"
 	DefaultWindowTitle  	 = "PhoningDL"
 	ConfigFileName			 = "config.json"
-	DefaultWindowWidth  	 = 800
-	DefaultWindowHeight 	 = 600
-	ListHeight				 = 400
+	DefaultWindowWidth  	 = 1000
+	DefaultWindowHeight 	 = 800
+	ListHeight				 = 600
 	DownloadWindowWidth 	 = 600
 	DownloadWindowHeight	 = 600
 	DefaultFetchConcurrency  = 100
