@@ -19,19 +19,19 @@ func getPNXML(apiKey, accessToken string, id int) (*PNXMLInfo, error) {
 		return nil, err
 	}
 
-    raw, ok := res["data"].(map[string]any)["lipPlayback"]
-    if !ok {
-        return nil, fmt.Errorf("missing lipPlayback field")
-    }
-    lipJSON, ok := raw.(string)
-    if !ok {
-        return nil, fmt.Errorf("lipPlayback is not a JSON string (got %T)", raw)
-    }
+	raw, ok := res["data"].(map[string]any)["lipPlayback"]
+	if !ok {
+		return nil, fmt.Errorf("missing lipPlayback field")
+	}
+	lipJSON, ok := raw.(string)
+	if !ok {
+		return nil, fmt.Errorf("lipPlayback is not a JSON string (got %T)", raw)
+	}
 
-    var lipMap map[string]any
-    if err := json.Unmarshal([]byte(lipJSON), &lipMap); err != nil {
-        return nil, fmt.Errorf("failed to parse lipPlayback JSON: %w", err)
-    }
+	var lipMap map[string]any
+	if err := json.Unmarshal([]byte(lipJSON), &lipMap); err != nil {
+		return nil, fmt.Errorf("failed to parse lipPlayback JSON: %w", err)
+	}
 
 	pnxmlData := new(PNXMLInfo)
 
@@ -43,7 +43,7 @@ func getPNXML(apiKey, accessToken string, id int) (*PNXMLInfo, error) {
 	if err := json.Unmarshal(lipBytes, &pnxmlJSON); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal into PNXMLJSON: %w", err)
 	}
-	
+
 	pnxmlData.MaxHeight = int(pnxmlJSON.Period[0].AdaptationSet[0].MaxHeight)
 	for _, adaptation := range pnxmlJSON.Period[0].AdaptationSet {
 		if adaptation.MimeType != "video/mp4" {
@@ -56,13 +56,13 @@ func getPNXML(apiKey, accessToken string, id int) (*PNXMLInfo, error) {
 				return MetaData{}, err
 			}
 			return MetaData{
-				Bitrate:   rep.BandWidth,
-				FPS:       rep.FrameRate,
-				Codec:     rep.Codec,
-				Width:     rep.Width,
-				Height:    rep.Height,
-				URL:       rep.BaseURL[0].Value,
-				Size:      size,
+				Bitrate: rep.BandWidth,
+				FPS:     rep.FrameRate,
+				Codec:   rep.Codec,
+				Width:   rep.Width,
+				Height:  rep.Height,
+				URL:     rep.BaseURL[0].Value,
+				Size:    size,
 			}, nil
 		}
 		concurrentRes, err := concurrentExecuteAny(getMetaData, adaptation.Representation, len(adaptation.Representation))

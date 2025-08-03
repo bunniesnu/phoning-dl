@@ -66,8 +66,8 @@ func (m *App) LoadingConfigScreen(done chan struct{}) *fyne.Container {
 			slog.Info("Trying to login")
 			_, err = Phoning("POST", m.config.ApiKey, "", "/fan/v1.0/login", map[string]string{
 				"wevAccessToken": m.config.AccessToken,
-				"tokenType": "APNS",
-				"deviceToken": "",
+				"tokenType":      "APNS",
+				"deviceToken":    "",
 			})
 			if err != nil {
 				slog.Error("Failed to login", "error", err)
@@ -150,18 +150,18 @@ func (m *App) MainScreen() *fyne.Container {
 				}
 			}
 			*liveReturn = Live{
-				Id:       live.Id,
-				Title:    live.Title,
-				Selected: true,
-				SelHeight: maxSize,
-				IsVideo:  live.MediaType == "LIVE",
-				StartAt: startAtParse,
-				EndAt:   endAtParse,
-				Duration: time.Duration(live.Duration) * time.Millisecond,
+				Id:          live.Id,
+				Title:       live.Title,
+				Selected:    true,
+				SelHeight:   maxSize,
+				IsVideo:     live.MediaType == "LIVE",
+				StartAt:     startAtParse,
+				EndAt:       endAtParse,
+				Duration:    time.Duration(live.Duration) * time.Millisecond,
 				IsLandscape: live.ScreenOrientation == "LANDSCAPE",
-				PNXMLInfo: pnxmlData,
+				PNXMLInfo:   pnxmlData,
 			}
-			fyne.Do(func(){
+			fyne.Do(func() {
 				cnt++
 				progress.SetValue(float64(cnt) / float64(len(*lives)))
 			})

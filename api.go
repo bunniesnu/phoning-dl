@@ -34,7 +34,7 @@ func hash(url, apikey string) map[string]string {
 	md := base64.StdEncoding.EncodeToString(digest)
 	return map[string]string{
 		"msgpad": strconv.Itoa(msgpad),
-		"md": md,
+		"md":     md,
 	}
 }
 

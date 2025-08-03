@@ -41,7 +41,7 @@ func DownloadConcurrentList(liveList *[]Live, updateFunc func(), baseDir string,
 			progressLabel,
 			wrappedProgress,
 		)
-		progress.Resize(fyne.NewSize(DownloadWindowWidth * 2 / 3, min(hbox.MinSize().Height, progress.MinSize().Height)))
+		progress.Resize(fyne.NewSize(DownloadWindowWidth*2/3, min(hbox.MinSize().Height, progress.MinSize().Height)))
 		fyne.Do(func() {
 			vbox.Add(hbox)
 		})
@@ -73,6 +73,6 @@ func DownloadConcurrentList(liveList *[]Live, updateFunc func(), baseDir string,
 	ctx, cancel := context.WithCancel(context.Background())
 	go concurrentExecuteAnyWithContext(add, liveListFiltered, DefaultConcurrency, ctx)
 	scrollable := container.NewScroll(vbox)
-	scrollable.SetMinSize(fyne.NewSize(0, DownloadWindowHeight * 3 / 4))
+	scrollable.SetMinSize(fyne.NewSize(0, DownloadWindowHeight*3/4))
 	return scrollable, cancel
 }

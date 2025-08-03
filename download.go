@@ -76,7 +76,7 @@ func (m *App) DownloadScreen(liveSelection *[]Live, livesData *[]LiveJSON) fyne.
 				return
 			}
 			slog.Info("Starting download")
-			go fyne.Do(func() {m.StartDownload(liveSelection, downloadFolder)})
+			go fyne.Do(func() { m.StartDownload(liveSelection, downloadFolder) })
 		}),
 	)
 	vbox := container.NewVBox(
@@ -97,10 +97,10 @@ func (m *App) StartDownload(liveSelection *[]Live, baseDir string) {
 	progressLabel := widget.NewLabel(fmt.Sprintf("Downloading (%d / %d)", completed, selNum))
 	update := func() {
 		completed++
-		fyne.Do(func(){progressLabel.SetText(fmt.Sprintf("Downloading (%d / %d)", completed, selNum))})
+		fyne.Do(func() { progressLabel.SetText(fmt.Sprintf("Downloading (%d / %d)", completed, selNum)) })
 	}
 	onProgress := func(progressDelta int64) {
-		fyne.Do(func(){totalProgress.SetValue(totalProgress.Value + float64(progressDelta))})
+		fyne.Do(func() { totalProgress.SetValue(totalProgress.Value + float64(progressDelta)) })
 	}
 	detailsVbox, cancel := DownloadConcurrentList(liveSelection, update, baseDir, onProgress)
 	vbox := container.NewVBox(

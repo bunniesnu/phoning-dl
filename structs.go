@@ -18,36 +18,36 @@ type App struct {
 }
 
 type LiveJSON struct {
-	Id				  int    `json:"liveId"`
-	Title			  string `json:"title"`
-	MediaType		  string `json:"mediaType"`
-	StartAt			  string `json:"startAt"`
-	EndAt			  string `json:"endAt"`
-	Duration		  int    `json:"duration"`
+	Id                int    `json:"liveId"`
+	Title             string `json:"title"`
+	MediaType         string `json:"mediaType"`
+	StartAt           string `json:"startAt"`
+	EndAt             string `json:"endAt"`
+	Duration          int    `json:"duration"`
 	ScreenOrientation string `json:"screenOrientation"`
 }
 
 type Live struct {
-	Title 	    string
-	Id		    int
+	Title       string
+	Id          int
 	IsVideo     bool
 	StartAt     time.Time
 	EndAt       time.Time
 	Duration    time.Duration
 	IsLandscape bool
-	Selected	bool
-	SelHeight	int
-	PNXMLInfo	*PNXMLInfo
+	Selected    bool
+	SelHeight   int
+	PNXMLInfo   *PNXMLInfo
 }
 
 type MetaData struct {
 	Bitrate int
-	FPS 	string
-	Codec 	string
-	Width 	int
-	Height 	int
-	URL 	string
-	Size 	int64
+	FPS     string
+	Codec   string
+	Width   int
+	Height  int
+	URL     string
+	Size    int64
 }
 
 type PNXMLInfo struct {
@@ -60,18 +60,18 @@ type Representation struct {
 	BaseURL []struct {
 		Value string `json:"value"`
 	}
-	Width int `json:"width"`
-	Height int `json:"height"`
-	BandWidth int `json:"bandwidth"`
+	Width     int    `json:"width"`
+	Height    int    `json:"height"`
+	BandWidth int    `json:"bandwidth"`
 	FrameRate string `json:"frameRate"`
-	Codec string `json:"codecs"`
+	Codec     string `json:"codecs"`
 }
 
 type PNXMLJSON struct {
 	Period []struct {
 		AdaptationSet []struct {
-			MaxHeight    float64 `json:"maxHeight"`
-			MimeType     string  `json:"mimeType"`
+			MaxHeight      float64          `json:"maxHeight"`
+			MimeType       string           `json:"mimeType"`
 			Representation []Representation `json:"representation"`
 		} `json:"adaptationSet"`
 		SupplementalProperty []struct {

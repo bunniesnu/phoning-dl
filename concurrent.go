@@ -16,14 +16,14 @@ func concurrentExecute[T comparable, R any](f func(T, context.Context) (R, error
 	errCh := make(chan error, 1)
 	for _, item := range items {
 		wg.Add(1)
-		go func(param T){
-			sem <- struct{}{} // acquire a slot
+		go func(param T) {
+			sem <- struct{}{}        // acquire a slot
 			defer func() { <-sem }() // release the slot
 			defer wg.Done()
 			select {
-				case <-ctx.Done():
-					return
-				default:
+			case <-ctx.Done():
+				return
+			default:
 			}
 			res, err := f(param, ctx)
 			if err != nil {
@@ -42,10 +42,10 @@ func concurrentExecute[T comparable, R any](f func(T, context.Context) (R, error
 		close(done)
 	}()
 	select {
-		case err := <-errCh:
-			return nil, err
-		case <-done:
-			return results, nil
+	case err := <-errCh:
+		return nil, err
+	case <-done:
+		return results, nil
 	}
 }
 
@@ -60,14 +60,14 @@ func concurrentExecuteAny[T any, R any](f func(T, context.Context) (R, error), i
 	errCh := make(chan error, 1)
 	for _, item := range items {
 		wg.Add(1)
-		go func(param T){
-			sem <- struct{}{} // acquire a slot
+		go func(param T) {
+			sem <- struct{}{}        // acquire a slot
 			defer func() { <-sem }() // release the slot
 			defer wg.Done()
 			select {
-				case <-ctx.Done():
-					return
-				default:
+			case <-ctx.Done():
+				return
+			default:
 			}
 			res, err := f(param, ctx)
 			if err != nil {
@@ -86,10 +86,10 @@ func concurrentExecuteAny[T any, R any](f func(T, context.Context) (R, error), i
 		close(done)
 	}()
 	select {
-		case err := <-errCh:
-			return nil, err
-		case <-done:
-			return results, nil
+	case err := <-errCh:
+		return nil, err
+	case <-done:
+		return results, nil
 	}
 }
 
@@ -102,14 +102,14 @@ func concurrentExecuteAnyWithContext[T any, R any](f func(T, context.Context) (R
 	errCh := make(chan error, 1)
 	for _, item := range items {
 		wg.Add(1)
-		go func(param T){
-			sem <- struct{}{} // acquire a slot
+		go func(param T) {
+			sem <- struct{}{}        // acquire a slot
 			defer func() { <-sem }() // release the slot
 			defer wg.Done()
 			select {
-				case <-ctx.Done():
-					return
-				default:
+			case <-ctx.Done():
+				return
+			default:
 			}
 			res, err := f(param, ctx)
 			if err != nil {
@@ -127,9 +127,9 @@ func concurrentExecuteAnyWithContext[T any, R any](f func(T, context.Context) (R
 		close(done)
 	}()
 	select {
-		case err := <-errCh:
-			return nil, err
-		case <-done:
-			return results, nil
+	case err := <-errCh:
+		return nil, err
+	case <-done:
+		return results, nil
 	}
 }

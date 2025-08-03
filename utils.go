@@ -48,7 +48,7 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 	}
 	email := gmail.Email.Email
 	updateProgress("Generated random email", 0.1)
-	
+
 	// Generate a random password
 	passwordSet := []byte{
 		getRandomChar(lower),
@@ -128,8 +128,8 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 		chromedp.Flag("headless", true),
 		chromedp.Flag("no-sandbox", true),
 		chromedp.Flag("disable-setuid-sandbox", true),
-        chromedp.Flag("disable-gpu", true),
-        chromedp.Flag("disable-dev-shm-usage", true),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("disable-dev-shm-usage", true),
 	)
 	allocCtx, cancelAlloc := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancelAlloc()
@@ -291,42 +291,42 @@ func formatBytes(size int64) string {
 
 // safeCreateFile ensures destPath is within baseDir and that there is enough free space.
 func safeCreateFile(destPath, baseDir string, size int64) (*os.File, error) {
-    cleanDest := filepath.Clean(destPath)
+	cleanDest := filepath.Clean(destPath)
 
-    absBase, err := filepath.Abs(baseDir)
-    if err != nil {
-        return nil, fmt.Errorf("resolving base dir: %w", err)
-    }
-    absDest, err := filepath.Abs(cleanDest)
-    if err != nil {
-        return nil, fmt.Errorf("resolving dest path: %w", err)
-    }
+	absBase, err := filepath.Abs(baseDir)
+	if err != nil {
+		return nil, fmt.Errorf("resolving base dir: %w", err)
+	}
+	absDest, err := filepath.Abs(cleanDest)
+	if err != nil {
+		return nil, fmt.Errorf("resolving dest path: %w", err)
+	}
 
-    rel, err := filepath.Rel(absBase, absDest)
-    if err != nil {
-        return nil, fmt.Errorf("resolving relative path: %w", err)
-    }
-    if rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
-        return nil, fmt.Errorf("destination %q is outside of %q", absDest, absBase)
-    }
+	rel, err := filepath.Rel(absBase, absDest)
+	if err != nil {
+		return nil, fmt.Errorf("resolving relative path: %w", err)
+	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+		return nil, fmt.Errorf("destination %q is outside of %q", absDest, absBase)
+	}
 
-    freeBytes, err := getDiskFreeSpace(absBase)
-    if err != nil {
-        return nil, fmt.Errorf("%w", err)
-    }
-    if freeBytes < size {
-        return nil, fmt.Errorf("not enough disk space: need %d, have %d", size, freeBytes)
-    }
+	freeBytes, err := getDiskFreeSpace(absBase)
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+	if freeBytes < size {
+		return nil, fmt.Errorf("not enough disk space: need %d, have %d", size, freeBytes)
+	}
 
-    outFile, err := os.Create(absDest)
-    if err != nil {
-        return nil, fmt.Errorf("creating file: %w", err)
-    }
-    if err := outFile.Truncate(size); err != nil {
-        outFile.Close()
-        return nil, fmt.Errorf("preallocating file: %w", err)
-    }
-    return outFile, nil
+	outFile, err := os.Create(absDest)
+	if err != nil {
+		return nil, fmt.Errorf("creating file: %w", err)
+	}
+	if err := outFile.Truncate(size); err != nil {
+		outFile.Close()
+		return nil, fmt.Errorf("preallocating file: %w", err)
+	}
+	return outFile, nil
 }
 
 func DownloadVideo(
