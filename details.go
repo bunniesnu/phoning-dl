@@ -20,6 +20,12 @@ func DownloadConcurrentList(liveList *[]Live, updateFunc func(), baseDir string,
 		}
 	}
 	vbox := container.NewVBox()
+	completedVbox := container.NewVBox()
+	totalVbox := container.NewVBox(
+		completedVbox,
+		vbox,
+	)
+	scrollable := container.NewScroll(totalVbox)
 	add := func(live *Live, ctx context.Context) (*fyne.Container, error) {
 		// Initialize
 		var selMetaData *MetaData
@@ -42,10 +48,21 @@ func DownloadConcurrentList(liveList *[]Live, updateFunc func(), baseDir string,
 			wrappedProgress,
 		)
 		progress.Resize(fyne.NewSize(DownloadWindowWidth*2/3, min(hbox.MinSize().Height, progress.MinSize().Height)))
+		shouldScroll := totalVbox.Size().Height - scrollable.Size().Height - scrollable.Offset.Y < 10
 		fyne.Do(func() {
 			vbox.Add(hbox)
 		})
 		time.Sleep(100 * time.Millisecond)
+		if shouldScroll{
+			fyne.Do(func() {
+				go func() {
+					fyne.Do(func() {
+						scrollable.ScrollToBottom()
+						slog.Debug("Scrolled to bottom after adding new download item")
+					})
+				}()
+			})
+		}
 
 		// Download
 		destPath := path.Join(baseDir, fmt.Sprintf("%d.mp4", live.Id))
@@ -67,12 +84,16 @@ func DownloadConcurrentList(liveList *[]Live, updateFunc func(), baseDir string,
 			return nil, err
 		}
 		updateFunc()
+		fyne.Do(func() {
+			vbox.Remove(hbox)
+			completedVbox.Add(hbox)
+			totalVbox.Refresh()
+		})
 		slog.Info(fmt.Sprintf("Download for id %d complete", live.Id))
 		return hbox, nil
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	go concurrentExecuteAnyWithContext(add, liveListFiltered, DefaultConcurrency, ctx)
-	scrollable := container.NewScroll(vbox)
 	scrollable.SetMinSize(fyne.NewSize(0, DownloadWindowHeight*3/4))
 	return scrollable, cancel
 }
