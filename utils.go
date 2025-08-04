@@ -56,7 +56,7 @@ func GenerateAccessToken(updateProgress func(msg string, value float64)) (string
 		getRandomChar(digits),
 		getRandomChar(specials),
 	}
-	for i := 4; i < 16; i++ {
+	for i := 4; i < passwordLen; i++ {
 		passwordSet = append(passwordSet, getRandomChar(allChars))
 	}
 	for i := len(passwordSet) - 1; i > 0; i-- {
