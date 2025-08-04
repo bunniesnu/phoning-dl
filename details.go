@@ -48,12 +48,12 @@ func DownloadConcurrentList(liveList *[]Live, updateFunc func(), baseDir string,
 			wrappedProgress,
 		)
 		progress.Resize(fyne.NewSize(DownloadWindowWidth*2/3, min(hbox.MinSize().Height, progress.MinSize().Height)))
-		shouldScroll := totalVbox.Size().Height - scrollable.Size().Height - scrollable.Offset.Y < 10
+		shouldScroll := totalVbox.Size().Height-scrollable.Size().Height-scrollable.Offset.Y < 10
 		fyne.Do(func() {
 			vbox.Add(hbox)
 		})
 		time.Sleep(100 * time.Millisecond)
-		if shouldScroll{
+		if shouldScroll {
 			fyne.Do(func() {
 				go func() {
 					fyne.Do(func() {
